@@ -24,12 +24,12 @@ const setupErrorHandlers = () => {
         console.log( 'Uncaught Exception Monitor:', err, origin ) );
 };
 
-const loadHandlers = ( client ) => {
-    const handlerFiles = fs.readdirSync( './src/handlers' )
+const loadLoaders = ( client ) => {
+    const loaderFiles = fs.readdirSync( './src/loaders' )
         .filter( file => file.endsWith( '.js' ) );
 
-    for ( const file of handlerFiles ) {
-        require( `./handlers/${ file }` )( client );
+    for ( const file of loaderFiles ) {
+        require( `./loaders/${ file }` )( client );
     }
 };
 
@@ -38,7 +38,7 @@ const initializeClient = async () => {
     client.commands = new Collection();
 
     setupErrorHandlers();
-    loadHandlers( client );
+    loadLoaders( client );
 
     await client.login( process.env.TOKEN );
     console.log( `Ready! Logged in as ${ client.user.tag } (${ Date.now() - startTime }ms)` );

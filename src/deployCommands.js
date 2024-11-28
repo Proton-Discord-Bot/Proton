@@ -1,51 +1,115 @@
-require( 'dotenv' ).config()
-const fs = require( 'fs' )
-const { REST, Routes } = require( 'discord.js' )
-const modules = [ 'admin', 'user', 'other' ]
-const commands = []
+require( 'dotenv' ).config();
+const fs = require( 'fs' );
+const path = require( 'path' );
+const { REST, Routes } = require( 'discord.js' );
 
 const startTime = Date.now();
-modules.forEach( ( module ) => {
-    const commandFiles = fs
-        .readdirSync( `./src/commands/${ module }/` )
-        .filter( ( file ) => file.endsWith( '.js' ) )
+const commands = [];
 
-    commandFiles.forEach( ( commandFile ) => {
-        const command = require( `./commands/${ module }/${ commandFile }` )
-        commands.push( command.data.toJSON() )
-    } )
-} )
+const categories = [
+    'config',
+    'context-menu',
+    'info',
+    'moderation',
+    'voice',
+];
 
-const rest = new REST( { version: '10' } ).setToken( process.env.TOKEN )
+categories.forEach( category => {
+    const categoryPath = path.join( __dirname, 'commands', category );
 
-    ; ( async () => {
+    if ( !fs.existsSync( categoryPath ) ) {
+        console.log( `Skipping ${ category } - directory not found` );
+        return;
+    }
+
+    const commandFiles = fs.readdirSync( categoryPath )
+        .filter( file => file.endsWith( '.js' ) );
+
+    console.log( `Loading ${ commandFiles.length } commands from ${ category }...` );
+
+    for ( const file of commandFiles ) {
+        const filePath = path.join( categoryPath, file );
         try {
-            const data = await rest.put(
-                Routes.applicationCommands( process.env.DISCORD_APPLICATION_ID, process.env.DISCORD_GUILD_ID ),
-                { body: commands }
-            )
-
-            console.log(
-                `Successfully reloaded ${ data.length } application commands. (${ Date.now() - startTime }ms)`
-            )
+            const CommandClass = require( filePath );
+            const command = new CommandClass();
+            commands.push( command.data.toJSON() );
+            console.log( `Loaded command: ${ command.data.name }` );
         } catch ( error ) {
-            console.error( error )
+            console.error( `Error loading command ${ file }:`, error.message );
         }
-    } )()
+    }
+} );
 
-/*rest.put(Routes.applicationCommands(process.env.DISCORD_APPLICATION_ID, process.env.DISCORD_GUILD_ID),
-    {body: commands})
-    .then(() => console.log("Successfully registered application commands."))
-    .catch(console.error)*/
+const rest = new REST( { version: '10' } ).setToken( process.env.TOKEN );
 
-//Delete a specific command by its ID
+async function deployCommands( guildId = null ) {
+    const route = guildId
+        ? Routes.applicationGuildCommands( process.env.DISCORD_APPLICATION_ID, guildId )
+        : Routes.applicationCommands( process.env.DISCORD_APPLICATION_ID );
 
-/* rest.delete(Routes.applicationCommand(process.env.DISCORD_APPLICATION_ID, ''))
-    .then(() => console.log('Successfully deleted application command'))
-    .catch(console.error); */
+    try {
+        console.log( `Started deploying ${ commands.length } application commands...` );
 
-//Delete all commands
+        const data = await rest.put( route, { body: commands } );
 
-/* rest.put(Routes.applicationCommands(process.env.DISCORD_APPLICATION_ID, process.env.DISCORD_GUILD_ID), { body: [] })
-.then(() => console.log('Successfully deleted all application commands.'))
-.catch(console.error); */
+        console.log( `Successfully deployed ${ data.length } application commands in ${ Date.now() - startTime }ms` );
+        return data;
+    } catch ( error ) {
+        console.error( 'Error deploying commands:', error );
+        throw error;
+    }
+}
+
+async function deleteCommands( guildId = null ) {
+    const route = guildId
+        ? Routes.applicationGuildCommands( process.env.DISCORD_APPLICATION_ID, guildId )
+        : Routes.applicationCommands( process.env.DISCORD_APPLICATION_ID );
+
+    try {
+        console.log( 'Started deleting application commands...' );
+        await rest.put( route, { body: [] } );
+        console.log( 'Successfully deleted all application commands.' );
+    } catch ( error ) {
+        console.error( 'Error deleting commands:', error );
+        throw error;
+    }
+}
+
+async function deleteCommand( commandId, guildId = null ) {
+    const route = guildId
+        ? Routes.applicationGuildCommand( process.env.DISCORD_APPLICATION_ID, guildId, commandId )
+        : Routes.applicationCommand( process.env.DISCORD_APPLICATION_ID, commandId );
+
+    try {
+        console.log( `Deleting command ${ commandId }...` );
+        await rest.delete( route );
+        console.log( 'Successfully deleted command.' );
+    } catch ( error ) {
+        console.error( 'Error deleting command:', error );
+        throw error;
+    }
+}
+
+( async () => {
+    try {
+        if ( process.argv.includes( '--delete-all' ) ) {
+            await deleteCommands( process.env.DISCORD_GUILD_ID );
+            return;
+        }
+
+        if ( process.argv.includes( '--delete' ) ) {
+            const commandId = process.argv[ process.argv.indexOf( '--delete' ) + 1 ];
+            if ( !commandId ) {
+                console.error( 'Please provide a command ID to delete' );
+                return;
+            }
+            await deleteCommand( commandId, process.env.DISCORD_GUILD_ID );
+            return;
+        }
+
+        await deployCommands( process.env.DISCORD_GUILD_ID );
+    } catch ( error ) {
+        console.error( 'Deployment failed:', error );
+        process.exit( 1 );
+    }
+} )();
