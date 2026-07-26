@@ -34,4 +34,5 @@ jspm_packages/
 # Project-specific files
 .idea
 *.sqlite
-.prettierrc*
+
+docs/
