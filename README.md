@@ -54,6 +54,26 @@ Migrations run automatically at startup, so there is no separate database setup 
 
 > Note: set `DISCORD_GUILD_ID` while developing — guild-scoped commands update instantly, whereas global ones can take up to an hour to propagate.
 
+### Deploying as a systemd service
+
+```sh
+sudo ./deploy/install.sh
+secretspec export --profile production --format dotenv | sudo tee /etc/proton/proton.env
+sudo chmod 600 /etc/proton/proton.env
+secretspec run --profile production -- bun run deploy   # register slash commands
+sudo systemctl start proton
+```
+
+The installer creates a `proton` system user, installs the application to `/opt/proton`,
+and enables a sandboxed unit that keeps its database in `/var/lib/proton`. Secrets are read
+by systemd from a root-owned `0600` environment file, so the bot's own user never has access
+to them. Re-run `install.sh` to upgrade; it never touches the database or an existing
+environment file.
+
+> **NixOS:** `install.sh` is imperative and will not survive a `nixos-rebuild`. Declare a
+> `systemd.services.proton` unit in your configuration instead — `deploy/proton.service` is
+> a reasonable starting point for its settings.
+
 ### Migrating from the pre-2.0 bot
 
 The old Sequelize database is imported automatically and losslessly. Rename it to
