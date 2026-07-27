@@ -1,4 +1,7 @@
 {
+  "common": {
+    "cooldown": "Bitte warte {seconds}s, bevor du diesen Befehl erneut benutzt."
+  },
   "errors": {
     "notAbleToKickUser": "Ich kann diesen Benutzer nicht kicken",
     "notAbleToBanUser": "Ich kann diesen Benutzer nicht bannen",
