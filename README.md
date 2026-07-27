@@ -6,22 +6,64 @@ It has all the features you want online user tracking or welcome and goodbye mes
 
 ## Getting started
 
-1. Clone the Repository and run `npm install` or `pnpm install` to install all the dependencies
-2. Create a `.env` file and add the following variables:
+Proton runs on [Bun](https://bun.sh) — there is no build step and no Node toolchain.
 
-```
-TOKEN=YOUR_BOT_TOKEN
-DISCORD_APPLICATION_ID=YOUR_APPLICATION_ID
-DISCORD_GUILD_ID=YOUR_GUILD_ID
-```
+1. Install dependencies:
 
-3. Run `npm run syncdb` or `pnpm syncdb` to create the database
-4. Run `npm run dev` or `pnpm dev` to start the bot in development mode
+   ```sh
+   bun install
+   ```
 
-> Note: You only need to add the `DISCORD_GUILD_ID` if you have only one server on which the bot should run. This allows you to register the commands faster.
+2. Provide secrets. Proton reads them from the environment via [SecretSpec](https://secretspec.dev); the required and optional variables are declared in `secretspec.toml` and documented in `.env.example`:
+
+   | Variable                 | Required | Purpose                                            |
+   | ------------------------ | -------- | -------------------------------------------------- |
+   | `TOKEN`                  | yes      | Bot token                                          |
+   | `DISCORD_APPLICATION_ID` | yes      | Application id, used to register commands          |
+   | `DISCORD_GUILD_ID`       | no       | Register commands to one guild for instant updates |
+   | `DATABASE_PATH`          | no       | SQLite file, defaults to `./database.sqlite`       |
+
+   Install SecretSpec with `curl -sSfL https://secretspec.dev/install.sh | sh`, then `secretspec init` and set your values.
+
+3. Register the slash commands:
+
+   ```sh
+   secretspec run -- bun run deploy
+   ```
+
+4. Start the bot:
+
+   ```sh
+   secretspec run -- bun run dev
+   ```
+
+Migrations run automatically at startup, so there is no separate database setup step.
+
+### Scripts
+
+| Script                | What it does                                                   |
+| --------------------- | -------------------------------------------------------------- |
+| `bun run dev`         | Start with watch-reload                                        |
+| `bun run start`       | Start once                                                     |
+| `bun run deploy`      | Register commands (`--delete-all` clears them)                 |
+| `bun run db:generate` | Generate a Drizzle migration after changing `src/db/schema.ts` |
+| `bun test`            | Run the test suite                                             |
+| `bun run typecheck`   | Typecheck with `tsc --noEmit`                                  |
+| `bun run lint`        | Lint with ESLint                                               |
+| `bun run format`      | Format with Prettier                                           |
+
+> Note: set `DISCORD_GUILD_ID` while developing — guild-scoped commands update instantly, whereas global ones can take up to an hour to propagate.
+
+### Migrating from the pre-2.0 bot
+
+The old Sequelize database is imported automatically and losslessly. Rename it to
+`database.legacy.sqlite` in the project root and start the bot once; guilds, warns and
+custom messages are copied into the new schema. The import skips any table that already
+has rows, so it is safe to leave the file in place.
 
 ### For NixOS users
-> :information_source: We have a `shell.nix` file that you can use to get all the dependencies you need to run the bot. <br>Just run `nix-shell` in the root directory of the project and you are good to go.
+
+> :information_source: `nix develop` gives you a shell with Bun available.
 
 ## Usage
 
@@ -33,8 +75,8 @@ DISCORD_GUILD_ID=YOUR_GUILD_ID
 
 ## Co-Authors
 
--   [@LordVertice](https://github.com/LordVertice)
--   [@TomSnd01](https://github.com/TomSnd01)
+- [@LordVertice](https://github.com/LordVertice)
+- [@TomSnd01](https://github.com/TomSnd01)
 
 ## Support
 
