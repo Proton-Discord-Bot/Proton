@@ -1,7 +1,8 @@
 {
   "common": {
     "cooldown": "Bitte warte {seconds}s, bevor du diesen Befehl erneut benutzt.",
-    "guildOnly": "Dieser Befehl kann nur in einem Server verwendet werden."
+    "guildOnly": "Dieser Befehl kann nur in einem Server verwendet werden.",
+    "error": "Etwas ist schief gelaufen. Bitte versuche es erneut."
   },
   "errors": {
     "notAbleToKickUser": "Ich kann diesen Benutzer nicht kicken",
