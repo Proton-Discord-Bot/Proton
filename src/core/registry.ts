@@ -1,4 +1,5 @@
 import { readdir } from 'node:fs/promises';
+import type { Dirent } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { Collection } from 'discord.js';
@@ -6,8 +7,15 @@ import { logger } from './logger';
 import type { Command } from './command';
 import type { Component } from './component';
 
-async function* walk(dir: string): AsyncGenerator<string> {
-  for (const entry of await readdir(dir, { withFileTypes: true })) {
+export async function* walk(dir: string): AsyncGenerator<string> {
+  let entries: Dirent[];
+  try {
+    entries = await readdir(dir, { withFileTypes: true });
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException)?.code === 'ENOENT') return;
+    throw err;
+  }
+  for (const entry of entries) {
     const full = join(dir, entry.name);
     if (entry.isDirectory()) yield* walk(full);
     else if (entry.name.endsWith('.ts') && !entry.name.endsWith('.test.ts')) yield full;
