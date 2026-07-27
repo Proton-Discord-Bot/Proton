@@ -1,6 +1,6 @@
 import { Events } from 'discord.js';
 import { defineEvent } from '../core/event';
-import { buildLogContainer, relativeTimestamp, sendGuildLog } from './messageLog';
+import { buildLogContainer, relativeTimestamp, sendGuildLog } from '../core/message-log';
 
 export default defineEvent({
   name: Events.MessageDelete,

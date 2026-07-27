@@ -7,7 +7,7 @@ import {
   ThumbnailBuilder,
   type Guild,
 } from 'discord.js';
-import { logger } from '../core/logger';
+import { logger } from './logger';
 import type { DB } from '../db/client';
 import { guildsRepo } from '../db/repos';
 

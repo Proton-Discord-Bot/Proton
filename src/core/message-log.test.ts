@@ -1,5 +1,5 @@
 import { test, expect } from 'bun:test';
-import { formatField, relativeTimestamp, truncate } from './messageLog';
+import { formatField, relativeTimestamp, truncate } from './message-log';
 
 test('formatField renders a bold name above its value', () => {
   expect(formatField({ name: 'Author', value: '<@123>' })).toBe('**Author**\n<@123>');
