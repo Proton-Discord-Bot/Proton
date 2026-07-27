@@ -27,6 +27,8 @@ export interface Command {
   data: CommandData;
   guildOnly?: boolean;
   cooldown?: number; // seconds
+  /** Set by the registry from the command's folder; used to group /help. */
+  category?: string;
   run(ctx: CommandContext): Promise<unknown>;
   autocomplete?(ctx: CommandContext<AutocompleteInteraction>): Promise<void>;
 }
