@@ -16,7 +16,10 @@ import { logger } from './logger';
  * Any error thrown during dispatch is caught, logged, and reported back to the user as
  * an ephemeral notice — this function never rejects.
  */
-export async function handleInteraction(client: ProtonClient, interaction: Interaction): Promise<void> {
+export async function handleInteraction(
+  client: ProtonClient,
+  interaction: Interaction,
+): Promise<void> {
   const t = client.translator(interaction.locale);
 
   try {
@@ -39,21 +42,27 @@ export async function handleInteraction(client: ProtonClient, interaction: Inter
 
     if (interaction.isAutocomplete()) {
       const cmd = client.commands.get(interaction.commandName);
-      const ctx = { interaction, client, t, db: client.db } as CommandContext<AutocompleteInteraction>;
+      const ctx = {
+        interaction,
+        client,
+        t,
+        db: client.db,
+      } as CommandContext<AutocompleteInteraction>;
       await cmd?.autocomplete?.(ctx);
       return;
     }
 
     if (interaction.isButton() || interaction.isAnySelectMenu() || interaction.isModalSubmit()) {
       const { feature, action, args } = decodeId(interaction.customId);
-      const component = client.components.get(`${feature}:${action}`) ?? client.components.get(feature);
+      const component =
+        client.components.get(`${feature}:${action}`) ?? client.components.get(feature);
       if (!component) {
         logger.warn(`No component registered for customId "${interaction.customId}"`);
         return;
       }
       // `interaction` is narrowed to ButtonInteraction | AnySelectMenuInteraction |
       // ModalSubmitInteraction here, matching ComponentContext['interaction'].
-      const ctx = { interaction, client, t, db: client.db, args } as ComponentContext;
+      const ctx = { interaction, client, t, db: client.db, action, args } as ComponentContext;
       await component.run(ctx);
       return;
     }

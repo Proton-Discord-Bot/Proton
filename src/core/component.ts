@@ -8,6 +8,12 @@ export interface ComponentContext {
   client: ProtonClient;
   t: Translator;
   db: DB;
+  /**
+   * The decoded action segment of the customId. A component registered against a whole
+   * feature (`match: 'info'`) handles several actions and needs to know which one fired;
+   * one registered as `feature:action` can ignore this.
+   */
+  action: string;
   args: string[];
 }
 

@@ -16,7 +16,11 @@ const hits = new Map<string, number>();
 export function cooldown(seconds: number): Middleware {
   return async (ctx, next) => {
     if (seconds <= 0) return next();
-    const i = ctx.interaction as { user: { id: string }; commandName: string; reply: (m: unknown) => unknown };
+    const i = ctx.interaction as {
+      user: { id: string };
+      commandName: string;
+      reply: (m: unknown) => unknown;
+    };
     const key = `${i.user.id}:${i.commandName}`;
     const now = Date.now();
     const until = hits.get(key) ?? 0;
@@ -33,7 +37,11 @@ export function cooldown(seconds: number): Middleware {
 export function guildGuard(command: Pick<Command, 'guildOnly'>): Middleware {
   return async (ctx, next) => {
     if (!command.guildOnly) return next();
-    const i = ctx.interaction as { inGuild(): boolean; guildId: string | null; reply: (m: unknown) => unknown };
+    const i = ctx.interaction as {
+      inGuild(): boolean;
+      guildId: string | null;
+      reply: (m: unknown) => unknown;
+    };
     if (!i.inGuild() || !i.guildId) {
       await i.reply(reply.ephemeralText(ctx.t('common.guildOnly')));
       return;

@@ -37,6 +37,14 @@ async function load<T>(dir: string, key: (m: T) => string, valid: (m: unknown) =
 }
 
 export const loadCommands = (dir: string) =>
-  load<Command>(dir, (c) => c.data.name, (m): m is Command => !!(m as Command)?.data?.name);
+  load<Command>(
+    dir,
+    (c) => c.data.name,
+    (m): m is Command => !!(m as Command)?.data?.name,
+  );
 export const loadComponents = (dir: string) =>
-  load<Component>(dir, (c) => c.match, (m): m is Component => typeof (m as Component)?.match === 'string');
+  load<Component>(
+    dir,
+    (c) => c.match,
+    (m): m is Component => typeof (m as Component)?.match === 'string',
+  );

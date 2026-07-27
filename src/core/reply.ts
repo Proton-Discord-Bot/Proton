@@ -1,6 +1,14 @@
-import { MessageFlags, TextDisplayBuilder, SeparatorBuilder, ContainerBuilder } from 'discord.js';
+import {
+  ActionRowBuilder,
+  ContainerBuilder,
+  MessageFlags,
+  SeparatorBuilder,
+  TextDisplayBuilder,
+  type MessageActionRowComponentBuilder,
+} from 'discord.js';
 
-export type Block = TextDisplayBuilder | SeparatorBuilder;
+export type ButtonRow = ActionRowBuilder<MessageActionRowComponentBuilder>;
+export type Block = TextDisplayBuilder | SeparatorBuilder | ButtonRow;
 const V2 = MessageFlags.IsComponentsV2;
 
 // `as const` matters: a plain array literal widens to `MessageFlags[]`, which discord.js
@@ -26,6 +34,7 @@ export const reply = {
     if (opts.accent !== undefined) c.setAccentColor(opts.accent);
     for (const b of opts.blocks) {
       if (b instanceof SeparatorBuilder) c.addSeparatorComponents(b);
+      else if (b instanceof ActionRowBuilder) c.addActionRowComponents(b);
       else c.addTextDisplayComponents(b);
     }
     const flags = opts.ephemeral ? V2_EPHEMERAL_FLAGS : V2_FLAGS;
