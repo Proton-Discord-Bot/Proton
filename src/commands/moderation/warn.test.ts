@@ -1,6 +1,7 @@
 import { test, expect } from 'bun:test';
 import { createDb, migrateDb } from '../../db/client';
 import { warnsRepo } from '../../db/repos';
+import { renderedText } from '../../test-utils/render';
 import warn from './warn';
 
 function ctxFor(
@@ -37,13 +38,6 @@ function ctxFor(
       replied: false,
     },
   } as any;
-}
-
-/** Concatenates every rendered TextDisplay in a reply, for content assertions. */
-function textsOf(reply: any): string {
-  const payload = JSON.parse(JSON.stringify(reply));
-  const container = payload.components[0];
-  return (container.components ?? [container]).map((c: any) => c.content ?? '').join('\n');
 }
 
 function freshDb() {
@@ -86,9 +80,9 @@ test('the third warn still sends exactly one reply, carrying the escalation noti
   expect(replies).toHaveLength(3);
   expect(warnsRepo(db).count('g1', 'target')).toBe(3);
 
-  expect(textsOf(replies[0])).not.toContain('warn.multiple');
+  expect(renderedText(replies[0])).not.toContain('warn.multiple');
 
-  const escalated = textsOf(replies[2]);
+  const escalated = renderedText(replies[2]);
   expect(escalated).toContain('warn.multiple');
   expect(escalated).toContain('"count":3');
   expect(escalated).toContain('warn.embed.footer');

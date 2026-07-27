@@ -3,22 +3,28 @@ import { createDb, migrateDb } from './client';
 import { guildsRepo, warnsRepo, cMessagesRepo } from './repos';
 
 test('guildsRepo.ensure is idempotent', () => {
-  const db = createDb(':memory:'); migrateDb(db);
+  const db = createDb(':memory:');
+  migrateDb(db);
   const r = guildsRepo(db);
-  const a = r.ensure('g1'); const b = r.ensure('g1');
-  expect(a.guildId).toBe('g1'); expect(b.guildId).toBe('g1');
+  const a = r.ensure('g1');
+  const b = r.ensure('g1');
+  expect(a.guildId).toBe('g1');
+  expect(b.guildId).toBe('g1');
 });
 test('warnsRepo counts and clears', () => {
-  const db = createDb(':memory:'); migrateDb(db);
+  const db = createDb(':memory:');
+  migrateDb(db);
   const w = warnsRepo(db);
-  w.add('g1', 'u1', 'x'); w.add('g1', 'u1', 'y');
+  w.add('g1', 'u1', 'x');
+  w.add('g1', 'u1', 'y');
   expect(w.count('g1', 'u1')).toBe(2);
   expect(w.clear('g1', 'u1')).toBe(2);
   expect(w.count('g1', 'u1')).toBe(0);
 });
 
 test('guildsRepo.delete removes the guild row and reports the changed count', () => {
-  const db = createDb(':memory:'); migrateDb(db);
+  const db = createDb(':memory:');
+  migrateDb(db);
   const r = guildsRepo(db);
   r.ensure('g1');
   expect(r.get('g1')).toBeDefined();
@@ -27,13 +33,15 @@ test('guildsRepo.delete removes the guild row and reports the changed count', ()
 });
 
 test('guildsRepo.delete returns 0 when the guild does not exist', () => {
-  const db = createDb(':memory:'); migrateDb(db);
+  const db = createDb(':memory:');
+  migrateDb(db);
   const r = guildsRepo(db);
   expect(r.delete('missing')).toBe(0);
 });
 
 test('cMessagesRepo.delete removes the cMessages row and reports the changed count', () => {
-  const db = createDb(':memory:'); migrateDb(db);
+  const db = createDb(':memory:');
+  migrateDb(db);
   const c = cMessagesRepo(db);
   c.set('g1', { welcomeMessage: 'hi' });
   expect(c.get('g1')).toBeDefined();
@@ -42,13 +50,15 @@ test('cMessagesRepo.delete removes the cMessages row and reports the changed cou
 });
 
 test('cMessagesRepo.delete returns 0 when no row exists for the guild', () => {
-  const db = createDb(':memory:'); migrateDb(db);
+  const db = createDb(':memory:');
+  migrateDb(db);
   const c = cMessagesRepo(db);
   expect(c.delete('missing')).toBe(0);
 });
 
 test('warnsRepo.clearGuild removes all warns for the guild across multiple users', () => {
-  const db = createDb(':memory:'); migrateDb(db);
+  const db = createDb(':memory:');
+  migrateDb(db);
   const w = warnsRepo(db);
   w.add('g1', 'u1', 'x');
   w.add('g1', 'u2', 'y');
@@ -58,4 +68,37 @@ test('warnsRepo.clearGuild removes all warns for the guild across multiple users
   expect(w.count('g1', 'u1')).toBe(0);
   expect(w.count('g1', 'u2')).toBe(0);
   expect(w.count('g2', 'u1')).toBe(1);
+});
+
+test('warnsRepo.clear removes only the requested amount when given a limit', () => {
+  const db = createDb(':memory:');
+  migrateDb(db);
+  const w = warnsRepo(db);
+  w.add('g1', 'u1', 'a');
+  w.add('g1', 'u1', 'b');
+  w.add('g1', 'u1', 'c');
+
+  expect(w.clear('g1', 'u1', 2)).toBe(2);
+  expect(w.count('g1', 'u1')).toBe(1);
+});
+
+test('warnsRepo.clear with a limit larger than the row count clears what exists', () => {
+  const db = createDb(':memory:');
+  migrateDb(db);
+  const w = warnsRepo(db);
+  w.add('g1', 'u1', 'a');
+
+  expect(w.clear('g1', 'u1', 10)).toBe(1);
+  expect(w.count('g1', 'u1')).toBe(0);
+});
+
+test('warnsRepo.clear leaves other users untouched', () => {
+  const db = createDb(':memory:');
+  migrateDb(db);
+  const w = warnsRepo(db);
+  w.add('g1', 'u1', 'a');
+  w.add('g1', 'u2', 'b');
+
+  w.clear('g1', 'u1');
+  expect(w.count('g1', 'u2')).toBe(1);
 });
