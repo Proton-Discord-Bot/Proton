@@ -1,20 +1,20 @@
-import {
-  MessageFlags,
-  TextDisplayBuilder,
-  SeparatorBuilder,
-  ContainerBuilder,
-} from 'discord.js';
+import { MessageFlags, TextDisplayBuilder, SeparatorBuilder, ContainerBuilder } from 'discord.js';
 
-type Block = TextDisplayBuilder | SeparatorBuilder;
+export type Block = TextDisplayBuilder | SeparatorBuilder;
 const V2 = MessageFlags.IsComponentsV2;
+
+// `as const` matters: a plain array literal widens to `MessageFlags[]`, which discord.js
+// rejects because reply flags accept only a four-flag subset.
+const V2_FLAGS = [V2] as const;
+const V2_EPHEMERAL_FLAGS = [V2, MessageFlags.Ephemeral] as const;
 
 export const reply = {
   text(content: string) {
-    return { flags: [V2], components: [new TextDisplayBuilder().setContent(content)] };
+    return { flags: V2_FLAGS, components: [new TextDisplayBuilder().setContent(content)] };
   },
   ephemeralText(content: string) {
     return {
-      flags: [V2, MessageFlags.Ephemeral],
+      flags: V2_EPHEMERAL_FLAGS,
       components: [new TextDisplayBuilder().setContent(content)],
     };
   },
@@ -28,7 +28,7 @@ export const reply = {
       if (b instanceof SeparatorBuilder) c.addSeparatorComponents(b);
       else c.addTextDisplayComponents(b);
     }
-    const flags = opts.ephemeral ? [V2, MessageFlags.Ephemeral] : [V2];
+    const flags = opts.ephemeral ? V2_EPHEMERAL_FLAGS : V2_FLAGS;
     return { flags, components: [c] };
   },
   text_(content: string) {
