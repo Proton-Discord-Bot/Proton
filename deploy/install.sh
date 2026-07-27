@@ -43,13 +43,23 @@ die() {
 
 command -v systemctl >/dev/null 2>&1 || die 'systemctl not found — this host does not use systemd'
 
-BUN_BIN="$(command -v bun || true)"
-[[ -n ${BUN_BIN} ]] || die 'bun not found on PATH. Install it from https://bun.sh first.'
-info "using bun at ${BUN_BIN} ($("${BUN_BIN}" --version))"
+BUN_SRC="$(command -v bun || true)"
+[[ -n ${BUN_SRC} ]] || die 'bun not found on PATH. Install it from https://bun.sh first.'
+# Follow symlinks: bun.sh's installer leaves ~/.bun/bin/bun pointing at the real binary.
+BUN_SRC="$(readlink -f "${BUN_SRC}")"
+readonly BUN_SRC
+info "found bun at ${BUN_SRC} ($("${BUN_SRC}" --version))"
 
 for item in "${PAYLOAD[@]}"; do
   [[ -e "${REPO_ROOT}/${item}" ]] || die "missing ${item} in ${REPO_ROOT} — run this from a full checkout"
 done
+
+# On a case-insensitive filesystem a checkout at /opt/Proton and an install dir of
+# /opt/proton are the same directory, and the payload refresh below would delete the
+# source it is about to copy from.
+if [[ -d ${INSTALL_DIR} ]] && [[ "$(readlink -f "${REPO_ROOT}")" == "$(readlink -f "${INSTALL_DIR}")" ]]; then
+  die "checkout and install directory are the same path (${INSTALL_DIR}) — clone elsewhere, e.g. /srv/proton-src"
+fi
 
 if [[ -e /etc/NIXOS ]]; then
   warn 'this host is NixOS: files written here will not survive a nixos-rebuild.'
@@ -84,6 +94,28 @@ for item in "${PAYLOAD[@]}"; do
   cp -a "${REPO_ROOT}/${item}" "${INSTALL_DIR}/${item}"
 done
 
+# The service runs as an unprivileged user under ProtectHome=yes, which makes /root,
+# /home and /run/user invisible to it. bun.sh's installer puts the binary in ~/.bun/bin,
+# so pointing the unit there fails with 203/EXEC — unreadable *and* hidden. Vendor a copy
+# into the install directory unless bun already lives in a system-wide location.
+case ${BUN_SRC} in
+  /usr/* | /opt/* | /bin/* | /sbin/*)
+    BUN_BIN="${BUN_SRC}"
+    info "using system-wide bun at ${BUN_BIN}"
+    ;;
+  *)
+    BUN_BIN="${INSTALL_DIR}/bin/bun"
+    info "vendoring bun to ${BUN_BIN} (${BUN_SRC} is not reachable by the service user)"
+    mkdir -p "${INSTALL_DIR}/bin"
+    # Copy then rename: replacing a running executable in place fails with ETXTBSY,
+    # whereas rename swaps the directory entry and leaves the running process alone.
+    cp -f "${BUN_SRC}" "${INSTALL_DIR}/bin/.bun.new"
+    chmod 0755 "${INSTALL_DIR}/bin/.bun.new"
+    mv -f "${INSTALL_DIR}/bin/.bun.new" "${BUN_BIN}"
+    ;;
+esac
+readonly BUN_BIN
+
 info 'installing production dependencies'
 (cd "${INSTALL_DIR}" && "${BUN_BIN}" install --frozen-lockfile --production)
 
@@ -91,6 +123,13 @@ info 'installing production dependencies'
 # rewrite its own source.
 chown -R root:root "${INSTALL_DIR}"
 chmod -R go-w "${INSTALL_DIR}"
+
+# Catch an unreachable interpreter here rather than as a 203/EXEC at first start.
+if command -v runuser >/dev/null 2>&1; then
+  runuser -u "${SERVICE_USER}" -- test -x "${BUN_BIN}" ||
+    die "service user '${SERVICE_USER}' cannot execute ${BUN_BIN} — refusing to install a unit that cannot start"
+  info "verified '${SERVICE_USER}' can execute ${BUN_BIN}"
+fi
 
 # --- Configuration -----------------------------------------------------------
 
@@ -142,12 +181,9 @@ if [[ ${env_is_placeholder} -eq 1 ]]; then
   echo "  Then start the service:"
   echo "    sudo systemctl start ${SERVICE_NAME}"
 else
-  if systemctl is-active --quiet "${SERVICE_NAME}.service"; then
-    info "restarting ${SERVICE_NAME}"
-    systemctl restart "${SERVICE_NAME}.service"
-  else
-    info "start it with: systemctl start ${SERVICE_NAME}"
-  fi
+  # restart also starts a stopped unit, and recovers one stuck in an auto-restart loop.
+  info "restarting ${SERVICE_NAME}"
+  systemctl restart "${SERVICE_NAME}.service"
 fi
 
 echo
