@@ -1,4 +1,3 @@
-import { reply } from './reply';
 import type { CommandContext } from './command';
 
 export type Middleware = (ctx: CommandContext, next: () => Promise<void>) => Promise<void>;
