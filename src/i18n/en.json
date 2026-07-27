@@ -147,6 +147,14 @@
       "removeAllDescription": "Removes the tracking of the amount of all users in a server",
       "removeBotsDescription": "Removes the tracking of the amount of bots in a server",
       "channelOptionDesciption": "The channel to track the amount"
+    },
+    "reply": {
+      "onlineSet": "The bot will now track the amount of online users in {channel}!",
+      "allSet": "The bot will now track the amount of all users in {channel}!",
+      "botsSet": "The bot will now track the amount of bots in {channel}!",
+      "onlineUnset": "The bot will no longer track the amount of online users!",
+      "allUnset": "The bot will no longer track the amount of all users!",
+      "botsUnset": "The bot will no longer track the amount of bots!"
     }
   },
   "goodbye": {

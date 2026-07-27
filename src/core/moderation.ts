@@ -1,4 +1,7 @@
-import type { GuildMember } from 'discord.js';
+import type { GuildMember, UserContextMenuCommandInteraction } from 'discord.js';
+import type { CommandContext } from './command';
+import type { I18nKey } from '../i18n';
+import { reply } from './reply';
 import { logger } from './logger';
 
 /**
@@ -29,4 +32,40 @@ export async function banMember(member: GuildMember, reason?: string): Promise<b
     logger.error(`Failed to ban member ${member.id}:`, err);
     return false;
   }
+}
+
+export interface ModerationAction {
+  /** Permission the invoker must hold. */
+  permission: bigint;
+  act(member: GuildMember): Promise<boolean>;
+  successKey: I18nKey;
+  failureKey: I18nKey;
+}
+
+/**
+ * Shared body of the Ban and Kick user context menus: check the invoker's permission,
+ * refuse bots, then act and report. Legacy duplicated this across both command files.
+ */
+export async function moderateTarget(ctx: CommandContext, action: ModerationAction) {
+  const interaction = ctx.interaction as UserContextMenuCommandInteraction;
+  const { t } = ctx;
+  const { guild } = interaction;
+  if (!guild) return;
+
+  const actor = interaction.member as GuildMember | null;
+  if (!actor?.permissions.has(action.permission)) {
+    return interaction.reply(reply.ephemeralText(t('errors.noPerms')));
+  }
+
+  if (interaction.targetUser.bot) {
+    return interaction.reply(reply.ephemeralText(t(action.failureKey)));
+  }
+
+  const target = await guild.members.fetch(interaction.targetUser.id).catch(() => null);
+  if (!target) {
+    return interaction.reply(reply.ephemeralText(t('errors.smthWentWrong')));
+  }
+
+  const ok = await action.act(target);
+  return interaction.reply(reply.ephemeralText(t(ok ? action.successKey : action.failureKey)));
 }

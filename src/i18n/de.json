@@ -147,6 +147,14 @@
       "removeAllDescription": "Entfernt die Verfolgung der Anzahl aller Benutzer in einem Server",
       "removeBotsDescription": "Entfernt die Verfolgung der Anzahl der Bots in einem Server",
       "channelOptionDesciption": "Der Channel in dem die Anzahl angezeigt wird"
+    },
+    "reply": {
+      "onlineSet": "Der Bot zählt jetzt die Anzahl der online Nutzer in {channel}!",
+      "allSet": "Der Bot zählt jetzt die Anzahl aller Nutzer in {channel}!",
+      "botsSet": "Der Bot zählt jetzt die Anzahl der Bots in {channel}!",
+      "onlineUnset": "Der Bot zählt die Anzahl der online Nutzer nicht mehr!",
+      "allUnset": "Der Bot zählt die Anzahl aller Nutzer nicht mehr!",
+      "botsUnset": "Der Bot zählt die Anzahl der Bots nicht mehr!"
     }
   },
   "goodbye": {

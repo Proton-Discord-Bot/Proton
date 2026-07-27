@@ -10,7 +10,7 @@ import {
 import { defineChatCommand } from '../../core/command';
 import { encodeId } from '../../core/customId';
 import { reply, type Block } from '../../core/reply';
-import { localizations, tEn } from '../../i18n';
+import { localizations, tEn, type Translator } from '../../i18n';
 
 const INFO_ACCENT_COLOR = 0x0099ff;
 
@@ -23,6 +23,51 @@ export function canModerate(
     actorPermissions.has([PermissionFlagsBits.BanMembers, PermissionFlagsBits.KickMembers]) &&
     !target.user.bot
   );
+}
+
+/**
+ * The member-info body, shared by `/info` and the Info context menu. When the viewer may
+ * moderate the target, kick/ban buttons are appended; they carry the target id so the
+ * router can act on them without any per-message collector.
+ */
+export function memberInfoBlocks(
+  member: GuildMember,
+  t: Translator,
+  opts: { withModerationButtons: boolean },
+): Block[] {
+  const blocks: Block[] = [
+    reply.text_(
+      `## ${t('info.embed.title', { user: `${member.user.tag} aka ${member.displayName}` })}`,
+    ),
+    reply.text_(
+      t('info.embed.fields.accountCreated', {
+        date: `<t:${Math.round(member.user.createdTimestamp / 1000)}>`,
+      }),
+    ),
+    reply.text_(
+      t('info.embed.fields.serverJoined', {
+        date: member.joinedTimestamp ? `<t:${Math.round(member.joinedTimestamp / 1000)}>` : '—',
+      }),
+    ),
+  ];
+
+  if (opts.withModerationButtons) {
+    blocks.push(
+      reply.separator(),
+      new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setStyle(ButtonStyle.Danger)
+          .setCustomId(encodeId('info', 'kick', member.id))
+          .setLabel(t('info.buttons.kick')),
+        new ButtonBuilder()
+          .setStyle(ButtonStyle.Danger)
+          .setCustomId(encodeId('info', 'ban', member.id))
+          .setLabel(t('info.buttons.ban')),
+      ),
+    );
+  }
+
+  return blocks;
 }
 
 const data = new SlashCommandBuilder()
@@ -49,40 +94,10 @@ export default defineChatCommand({
     const user = interaction.options.getUser(tEn('info.command.userOptionName'), true);
     const member = await guild.members.fetch(user.id);
 
-    const blocks: Block[] = [
-      reply.text_(
-        `## ${t('info.embed.title', { user: `${member.user.tag} aka ${member.displayName}` })}`,
-      ),
-      reply.text_(
-        t('info.embed.fields.accountCreated', {
-          date: `<t:${Math.round(member.user.createdTimestamp / 1000)}>`,
-        }),
-      ),
-      reply.text_(
-        t('info.embed.fields.serverJoined', {
-          date: member.joinedTimestamp ? `<t:${Math.round(member.joinedTimestamp / 1000)}>` : '—',
-        }),
-      ),
-    ];
-
     const actor = interaction.member as GuildMember | null;
-    if (actor && canModerate(actor.permissions, member)) {
-      // Legacy attached a message component collector here, which died with the process
-      // and after its timeout. The buttons now round-trip through the router instead.
-      blocks.push(
-        reply.separator(),
-        new ActionRowBuilder<ButtonBuilder>().addComponents(
-          new ButtonBuilder()
-            .setStyle(ButtonStyle.Danger)
-            .setCustomId(encodeId('info', 'kick', member.id))
-            .setLabel(t('info.buttons.kick')),
-          new ButtonBuilder()
-            .setStyle(ButtonStyle.Danger)
-            .setCustomId(encodeId('info', 'ban', member.id))
-            .setLabel(t('info.buttons.ban')),
-        ),
-      );
-    }
+    const blocks = memberInfoBlocks(member, t, {
+      withModerationButtons: !!actor && canModerate(actor.permissions, member),
+    });
 
     return interaction.reply(
       reply.container({ accent: INFO_ACCENT_COLOR, ephemeral: true, blocks }),

@@ -5,9 +5,7 @@ const catalogs = { en, de } as const;
 export type Locale = keyof typeof catalogs;
 
 type Leaves<T, P extends string = ''> = {
-  [K in keyof T & string]: T[K] extends string
-    ? `${P}${K}`
-    : Leaves<T[K], `${P}${K}.`>;
+  [K in keyof T & string]: T[K] extends string ? `${P}${K}` : Leaves<T[K], `${P}${K}.`>;
 }[keyof T & string];
 export type I18nKey = Leaves<typeof en>;
 export type Translator = (key: I18nKey, vars?: Record<string, string | number>) => string;
