@@ -11,6 +11,10 @@ export function guildsRepo(db: DB) {
     get: (guildId: string) => db.select().from(guilds).where(eq(guilds.guildId, guildId)).get(),
     update: (guildId: string, patch: Partial<GuildRow>) =>
       db.update(guilds).set(patch).where(eq(guilds.guildId, guildId)).run(),
+    delete: (guildId: string) =>
+      (db.delete(guilds).where(eq(guilds.guildId, guildId)).run() as unknown as {
+        changes: number;
+      }).changes,
   };
 }
 export function warnsRepo(db: DB) {
@@ -27,6 +31,10 @@ export function warnsRepo(db: DB) {
       (db.delete(warns).where(and(eq(warns.guildId, g), eq(warns.userId, u))).run() as unknown as {
         changes: number;
       }).changes,
+    clearGuild: (g: string) =>
+      (db.delete(warns).where(eq(warns.guildId, g)).run() as unknown as {
+        changes: number;
+      }).changes,
   };
 }
 export function cMessagesRepo(db: DB) {
@@ -36,5 +44,9 @@ export function cMessagesRepo(db: DB) {
     set: (g: string, patch: Partial<CMessageRow>) =>
       db.insert(cMessages).values({ guildId: g, ...patch })
         .onConflictDoUpdate({ target: cMessages.guildId, set: patch }).run(),
+    delete: (g: string) =>
+      (db.delete(cMessages).where(eq(cMessages.guildId, g)).run() as unknown as {
+        changes: number;
+      }).changes,
   };
 }
