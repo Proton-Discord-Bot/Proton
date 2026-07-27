@@ -34,3 +34,19 @@ export interface Command {
 export function defineCommand(cmd: Command): Command {
   return cmd;
 }
+
+export type ChatInputContext = CommandContext<ChatInputCommandInteraction>;
+
+export interface ChatCommand extends Omit<Command, 'run'> {
+  run(ctx: ChatInputContext): Promise<unknown>;
+}
+
+/**
+ * `defineCommand` for slash commands. The router hands every command the same widened
+ * `CommandContext`, but a command built from a `SlashCommandBuilder` can only ever be
+ * invoked with a `ChatInputCommandInteraction` — this narrows it once, here, instead of
+ * making every command body cast.
+ */
+export function defineChatCommand(cmd: ChatCommand): Command {
+  return { ...cmd, run: (ctx) => cmd.run(ctx as ChatInputContext) };
+}
