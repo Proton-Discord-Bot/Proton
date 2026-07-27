@@ -1,6 +1,7 @@
 {
   "common": {
-    "cooldown": "Please wait {seconds}s before using this again."
+    "cooldown": "Please wait {seconds}s before using this again.",
+    "guildOnly": "This command can only be used in a server."
   },
   "errors": {
     "notAbleToKickUser": "I am not able to kick this user",

@@ -1,4 +1,6 @@
-import type { CommandContext } from './command';
+import type { Command, CommandContext } from './command';
+import { reply } from './reply';
+import { guildsRepo } from '../db/repos';
 
 export type Middleware = (ctx: CommandContext, next: () => Promise<void>) => Promise<void>;
 
@@ -24,6 +26,20 @@ export function cooldown(seconds: number): Middleware {
       return;
     }
     hits.set(key, now + seconds * 1000);
+    return next();
+  };
+}
+
+export function guildGuard(command: Pick<Command, 'guildOnly'>): Middleware {
+  return async (ctx, next) => {
+    if (!command.guildOnly) return next();
+    const i = ctx.interaction as { inGuild(): boolean; guildId: string | null; reply: (m: unknown) => unknown };
+    if (!i.inGuild() || !i.guildId) {
+      await i.reply(reply.ephemeralText(ctx.t('common.guildOnly')));
+      return;
+    }
+    ctx.guildId = i.guildId;
+    ctx.guild = guildsRepo(ctx.db).ensure(i.guildId);
     return next();
   };
 }
