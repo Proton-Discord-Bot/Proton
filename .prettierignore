@@ -1,0 +1,10 @@
+node_modules
+dist
+bun.lock
+pnpm-lock.yaml
+package-lock.json
+src/db/migrations
+docs
+.superpowers
+**/*.js
+**/*.cjs

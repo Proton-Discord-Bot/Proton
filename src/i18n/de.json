@@ -1,0 +1,248 @@
+{
+  "common": {
+    "cooldown": "Bitte warte {seconds}s, bevor du diesen Befehl erneut benutzt.",
+    "guildOnly": "Dieser Befehl kann nur in einem Server verwendet werden.",
+    "error": "Etwas ist schief gelaufen. Bitte versuche es erneut."
+  },
+  "errors": {
+    "notAbleToKickUser": "Ich kann diesen Benutzer nicht kicken",
+    "notAbleToBanUser": "Ich kann diesen Benutzer nicht bannen",
+    "smthWentWrong": "Etwas ist schief gelaufen",
+    "noPerms": "Du hast nicht die nötigen Rechte, um diesen Befehl auszuführen"
+  },
+  "success": {
+    "kickSuccess": "Der Benutzer wurde erfolgreich gekickt",
+    "banSuccess": "Der Benutzer wurde erfolgreich gebannt"
+  },
+  "help": {
+    "command": {
+      "description": "Zeigt alle Befehle an"
+    },
+    "embed": {
+      "title": "Hilfe",
+      "description": "Hier kannst du alle Befehle sehen\r------------------",
+      "footer": "Hinweis: Mehr Befehle werden bald hinzugefügt"
+    }
+  },
+  "contribute": {
+    "command": {
+      "description": "Zeigt das Contributions Menü an"
+    },
+    "buttons": {
+      "labelDonate": "Spenden",
+      "labelGithub": "Github"
+    },
+    "embed": {
+      "title": "Contribute",
+      "description": "Hier kannst du alle Contributionsmethoden finden",
+      "fields": {
+        "donate": {
+          "name": "Spenden",
+          "value": "Du kannst Geld spenden, um den Server am laufen zu halten und/oder den Entwicklern einen Kaffee zu kaufen"
+        },
+        "github": {
+          "name": "Github",
+          "value": "Du kannst Fehler melden, damit die Entwickler sie beheben können"
+        }
+      }
+    }
+  },
+  "info": {
+    "command": {
+      "description": "Gibt Infos über einen Benutzer",
+      "userOptionName": "mitglied",
+      "userOptionDescription": "Das Mitglied, über das du Infos haben willst"
+    },
+    "buttons": {
+      "kick": "Kick",
+      "ban": "Bannen"
+    },
+    "embed": {
+      "title": "Info über den Nutzer: {user}",
+      "fields": {
+        "accountCreated": "Account erstellt am: {date}",
+        "serverJoined": "Server beigetreten am: {date}"
+      }
+    }
+  },
+  "channelSetup": {
+    "command": {
+      "subCommandJoin": {
+        "description": "Richtet den Join Channel ein",
+        "channelOptionDescription": "Der Channel, in dem die Join Nachrichten gesendet werden sollen"
+      },
+      "subCommandLeave": {
+        "description": "Richtet den Leave Channel ein",
+        "channelOptionDescription": "Der Channel, in dem die Leave Nachrichten gesendet werden sollen"
+      },
+      "subCommandUnsetJoinDescription": "Löscht den Join Channel",
+      "subCommandUnsetLeaveDescription": "Löscht den Leave Channel"
+    },
+    "reply": {
+      "joinChannelSet": "Der Join Channel wurde erfolgreich gesetzt zu {channel}",
+      "leaveChannelSet": "Der Leave Channel wurde erfolgreich gesetzt zu {channel}",
+      "joinChannelUnset": "Der Join Channel wurde erfolgreich gelöscht",
+      "leaveChannelUnset": "Der Leave Channel wurde erfolgreich gelöscht"
+    }
+  },
+  "clear": {
+    "command": {
+      "description": "Lösche Nachrichten",
+      "integerOptionDescription": "Die Anzahl der Nachrichten, die gelöscht werden sollen"
+    },
+    "reply": {
+      "over100": "Du kannst nicht mehr als 100 Nachrichten löschen",
+      "under1": "Du kannst nicht weniger als 1 Nachricht löschen",
+      "success": "{count} Nachrichten wurden erfolgreich gelöscht",
+      "error": "Es ist ein Fehler beim Löschen der Nachrichten aufgetreten"
+    }
+  },
+  "config": {
+    "commandDesciption": "Zeigt die aktuelle Konfiguration des Bots an",
+    "trackEmbed": {
+      "title": "Statistik Channels",
+      "fields": {
+        "online": {
+          "name": "Online",
+          "value": "Wird nicht getrackt"
+        },
+        "all": {
+          "name": "Alle Mitglieder",
+          "value": "Wird nicht getrackt"
+        },
+        "bots": {
+          "name": "Bots",
+          "value": "Wird nicht getrackt"
+        }
+      }
+    },
+    "channelEmbed": {
+      "title": "Angepasste Nachrichten",
+      "fields": {
+        "welcome": {
+          "name": "Willkommen Channel",
+          "value": "Es wird keine Willkommensnachricht geschickt"
+        },
+        "leave": {
+          "name": "Verlassen Channel",
+          "value": "Es wird keine Verlassennachricht geschickt"
+        },
+        "welcomeMessage": {
+          "name": "Willkommensnachricht",
+          "value": "Willkommen @user auf dem @server!"
+        },
+        "goodbyeMessage": {
+          "name": "Verabschiedungsnachricht",
+          "value": "@user hat den server verlassen!"
+        }
+      }
+    }
+  },
+  "track": {
+    "command": {
+      "addOnlineDescription": "Konfiguriert den Bot, um die Anzahl der Benutzer in einem Server zu verfolgen, welche online sind",
+      "addAllDescription": "Konfiguriert den Bot, um die Anzahl aller Benutzer in einem Server zu verfolgen",
+      "addBotsDescription": "Konfiguriert den Bot, um die Anzahl der Bots in einem Server zu verfolgen",
+      "removeOnlineDescription": "Entfernt die Verfolgung der Anzahl der Benutzer in einem Server welche online sind",
+      "removeAllDescription": "Entfernt die Verfolgung der Anzahl aller Benutzer in einem Server",
+      "removeBotsDescription": "Entfernt die Verfolgung der Anzahl der Bots in einem Server",
+      "channelOptionDesciption": "Der Channel in dem die Anzahl angezeigt wird"
+    },
+    "reply": {
+      "onlineSet": "Der Bot zählt jetzt die Anzahl der online Nutzer in {channel}!",
+      "allSet": "Der Bot zählt jetzt die Anzahl aller Nutzer in {channel}!",
+      "botsSet": "Der Bot zählt jetzt die Anzahl der Bots in {channel}!",
+      "onlineUnset": "Der Bot zählt die Anzahl der online Nutzer nicht mehr!",
+      "allUnset": "Der Bot zählt die Anzahl aller Nutzer nicht mehr!",
+      "botsUnset": "Der Bot zählt die Anzahl der Bots nicht mehr!"
+    }
+  },
+  "goodbye": {
+    "command": {
+      "description": "Setzt die Verabschiedungsnachricht",
+      "messageOptionDescription": "Die Nachricht, die gesendet werden soll (Leer lassen um zurückzusetzen)"
+    },
+    "reply": {
+      "messageSet": "Die Verabschiedungsnachricht wurde erfolgreich gesetzt!",
+      "messageReset": "Die Verabschiedungsnachricht wurde erfolgreich zurückgesetzt!"
+    }
+  },
+  "resetwarns": {
+    "command": {
+      "description": "Setzt die Warns eines Benutzers zurück",
+      "userOptionDescription": "Der Benutzer, dessen Warns zurückgesetzt werden sollen",
+      "integerOptionDescription": "Die Anzahl der Warns, die zurückgesetzt werden sollen | Standard: all"
+    },
+    "all": "alle",
+    "embed": {
+      "title": "Warn-System",
+      "fields": {
+        "reset": {
+          "name": "Du hast die Warnung zurückgesetzt",
+          "value": "Anzahl: {count}"
+        },
+        "noWarns": {
+          "name": "Dieser Benutzer hat keine Warns",
+          "value": "Nichts zum zurücksetzen"
+        }
+      }
+    }
+  },
+  "warn": {
+    "command": {
+      "description": "Warnt einen Benutzer",
+      "userOptionDescription": "Der Benutzer, der gewarnt werden soll",
+      "stringOptionDescription": "Der Grund der Warnung"
+    },
+    "reply": {
+      "notYourself": "Du kannst dich nicht selbst warnen",
+      "notAdmin": "Du kannst keine Administratoren warnen"
+    },
+    "reason": "Grund: {reason}",
+    "multiple": "{user} wurde bereits mehrmals gewarnt: {count}",
+    "embed": {
+      "title": "Warn-System",
+      "footer": "Du solltest überlegen, ob du nichts gegen diesen Nutzer unternehmen willst oder du setzt seine Warns zurück mit /resetwarns"
+    }
+  },
+  "welcome": {
+    "command": {
+      "description": "Setzt die Willkommensnachricht",
+      "stringOptionDescription": "Die Nachricht, die gesendet werden soll (Leer lassen um zurückzusetzen)"
+    },
+    "reply": {
+      "messageSet": "Die Willkommensnachricht wurde erfolgreich gesetzt!",
+      "messageReset": "Die Willkommensnachricht wurde erfolgreich zurückgesetzt!"
+    }
+  },
+  "joinRole": {
+    "command": {
+      "description": "Setzt die Rolle, die einem Benutzer gegeben wird, wenn er dem Server beitritt",
+      "roleOptionDescription": "Die Rolle, die gegeben werden soll (Leer lassen um zurückzusetzen)"
+    },
+    "reply": {
+      "roleSet": "Die Join-Rolle wurde erfolgreich gesetzt!",
+      "roleReset": "Die Join-Rolle wurde erfolgreich zurückgesetzt!"
+    }
+  },
+  "logSystem": {
+    "command": {
+      "description": "Richtet das Log-System ein (Wenn kein Channel angegeben wird, wird das Log-System deaktiviert)",
+      "channelOptionDescription": "Der Channel, in dem die Logs gesendet werden sollen"
+    },
+    "reply": {
+      "activated": "Das Log-System wurde erfolgreich aktiviert",
+      "deactivated": "Das Log-System wurde erfolgreich deaktiviert"
+    }
+  },
+  "join2Create": {
+    "command": {
+      "description": "Richtet das Join2Create System ein",
+      "channelOptionDescription": "Der Channel, in dem die Join2Create Nachrichten gesendet werden sollen"
+    },
+    "reply": {
+      "activated": "Das Join2Create System wurde erfolgreich aktiviert",
+      "deactivated": "Das Join2Create System wurde erfolgreich deaktiviert"
+    }
+  }
+}
